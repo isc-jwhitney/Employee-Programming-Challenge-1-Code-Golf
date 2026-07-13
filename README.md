@@ -119,7 +119,7 @@ An expanded version of that code, along with comments explaining how it works / 
       close o, f
     }
     
-    // Set `f` to the path of the next file from under [workingDirectory]/in/*
+    // Set `f` to the path of the next file from under /home/irisowner/dev/data/in/*
     // If we've processed all of the files, exit the loop
     set f = $zSearch("")
     quit:f=""
