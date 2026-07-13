@@ -6,13 +6,28 @@ Produce a correct ObjectScript-only\* solution to the challenge, using a minimal
 
 \* System functions are allowed, but direct use of other languages/libraries/programs (eg. via `$zf`) is not.
 
-## Code (468 characters)
+## Usage
+
+Clone this repository, and ensure that user id `51773` has write access to `./data/out` (eg. by running `sudo chown -R 51773:51773 ./data`).
+
+| Call                                      | Description                                                                | Prerequisites                                                                  |
+| ----------------------------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| `src/reset-environment.sh`                | Set up the Docker container.                                               | No prerequisites.                                                              |
+| `src/test-cold-start.sh (num_iterations)` | Set up the Docker container, import `RunScript.mac`, and run the solution. | No prerequisites.                                                              |
+| `src/test-warm-start.sh (num_iterations)` | Import `RunScript.mac` and run the solution.                               | Requires an already-set-up Docker container.                                   |
+| `src/iris-session.sh`                     | Open up an IRIS session in the Docker container.                           | Requires an already-set-up Docker container.                                   | 
+| - `Do ^RunScript`                         | Run the solution.                                                          | Requires an already-set-up Docker container with `src/RunScript.mac` imported. |             
+| - `Do Reload^RunScript`                   | Import a new version of `RunScript.mac` into the IRIS instance.            | Requires an already-set-up Docker container with `src/RunScript.mac` imported. |
+| `src/cat-output.sh`                       | Display the the contents of the output files (from `data/out`).            | Requires the solution to have been run, to produce output files.               |
+
+## How it works
+
+The following line of ObjectScript code in `^RunScript` processes the input files to produce output:
 ```objectscript
 d $zu(168,"~/dev/data") s f=$zse("in/*") f{s o="out"_$e(f,3,*-3) o f:/GZIP,o:"WT" u o w "source_id,bp_min_flux,bp_max_flux,rp_min_flux,rp_max_flux,percentage_change" u f f i=1:1:367{r l} try{f{f i=2:1:3{s t=$vop("fromstring",$p(l,"[",i*5),"decimal"),a(i)=$vop("max",t),c(i)=$vop("min",t,$vop("!=",t,0)),b(i)=$s(c(i):a(i)-c(i)/c(i),1:0)} s:b(3)>b(2) b(2)=b(3) u o w:b(2)>1 !,$lts($lb($p(l,",",2),c(2),a(2),c(3),a(3),b(2)*100)) u f r l}}catch{c o,f} s f=$zse("") q:f=""}
 ```
 
-## Explanation (commands expanded / whitespace added for readability)
-
+An expanded version of that code, along with comments explaining how it works / why certain decisions were made, is included below:
 ```objectscript
   // Set the current working directory to "/home/irisowner/dev/data".
   // Equivalent to $System.Process.CurrentDirectory("~/dev/data")
